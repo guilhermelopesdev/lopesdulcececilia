@@ -4,6 +4,7 @@ import subprocess
 import threading
 import platform
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont, QFontDatabase
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QPushButton, QSizePolicy
 
 # Detecta se é macOS ou Linux
@@ -85,11 +86,21 @@ def start_midi_listener():
 class MidiWindowSelector(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Configuração MIDI para Janelas")
+        self.setWindowTitle("Cantus MIDI")
         self.setGeometry(100, 100, 600, 500)  # Aumentando o tamanho da janela para acomodar os botões
+
+        # Fonte medieval para o título
+        title_font = QFont("Times New Roman", 24, QFont.Bold)  # Fonte básica para simular medieval
+        title_font.setItalic(True)  # Pode usar itálico para dar um estilo diferente
 
         # Layout principal
         layout = QVBoxLayout()
+
+        # Título da janela com fonte medieval
+        title_label = QLabel("Cantus MIDI")
+        title_label.setFont(title_font)
+        title_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title_label)
 
         # Frame para seleção da porta MIDI
         midi_frame = QHBoxLayout()

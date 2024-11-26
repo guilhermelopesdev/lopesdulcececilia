@@ -53,7 +53,7 @@ NumberOfEnclosures=0
 NumberOfTremulants=0
 
 [Coupler001]
-Name=Pedal + Hauptwerk
+Name=PEDAL + I MANUAL
 DefaultToEngaged=N
 UnisonOff=N
 DestinationManual=001
@@ -65,7 +65,7 @@ CoupleToSubsequentUpwardIntramanualCouplers=N
 CoupleToSubsequentDownwardIntramanualCouplers=N
 
 [Coupler002]
-Name=Pedal + Hauptwerk SuperOktave
+Name=PEDAL + I MANUAL SUPER
 DefaultToEngaged=N
 UnisonOff=N
 DestinationManual=001
@@ -77,7 +77,7 @@ CoupleToSubsequentUpwardIntramanualCouplers=N
 CoupleToSubsequentDownwardIntramanualCouplers=N
 
 [Coupler003]
-Name=Pedal + Schwellwerk
+Name=PEDAL+ II MANUAL
 DefaultToEngaged=N
 UnisonOff=N
 DestinationManual=002
@@ -89,7 +89,7 @@ CoupleToSubsequentUpwardIntramanualCouplers=N
 CoupleToSubsequentDownwardIntramanualCouplers=N
 
 [Coupler004]
-Name=Hauptwerk SuperOktave
+Name=I MANUAL SUPER
 DefaultToEngaged=N
 UnisonOff=N
 DestinationManual=001
@@ -101,7 +101,7 @@ CoupleToSubsequentUpwardIntramanualCouplers=N
 CoupleToSubsequentDownwardIntramanualCouplers=N
 
 [Coupler005]
-Name=Hauptwerk + Schwellwerk
+Name=I MANUAL + II MANUAL
 DefaultToEngaged=N
 UnisonOff=N
 DestinationManual=002
@@ -113,7 +113,7 @@ CoupleToSubsequentUpwardIntramanualCouplers=N
 CoupleToSubsequentDownwardIntramanualCouplers=N
 
 [Coupler006]
-Name=Hauptwerk + Schwellwerk SubOktave
+Name=I MANUAL + II MANUAL SUB
 DefaultToEngaged=N
 UnisonOff=N
 DestinationManual=002
@@ -125,7 +125,7 @@ CoupleToSubsequentUpwardIntramanualCouplers=N
 CoupleToSubsequentDownwardIntramanualCouplers=N
 
 [Coupler007]
-Name=Hauptwerk + Schwellwerk SuperOktave
+Name=I MANUAL + II MANUAL SUPER
 DefaultToEngaged=N
 UnisonOff=N
 DestinationManual=002
@@ -137,7 +137,7 @@ CoupleToSubsequentUpwardIntramanualCouplers=N
 CoupleToSubsequentDownwardIntramanualCouplers=N
 
 [Coupler008]
-Name=Schwellwerk SuperOktave
+Name=II MANUAL SUPER
 DefaultToEngaged=N
 UnisonOff=N
 DestinationManual=002
@@ -149,10 +149,22 @@ CoupleToSubsequentUpwardIntramanualCouplers=N
 CoupleToSubsequentDownwardIntramanualCouplers=N
 
 [Coupler009]
-Name=Schwellwerk SubOktave
+Name=II MANUAL SUB
 DefaultToEngaged=N
 UnisonOff=N
 DestinationManual=002
+DestinationKeyshift=-12
+CoupleToSubsequentUnisonIntermanualCouplers=N
+CoupleToSubsequentUpwardIntermanualCouplers=N
+CoupleToSubsequentDownwardIntermanualCouplers=N
+CoupleToSubsequentUpwardIntramanualCouplers=N
+CoupleToSubsequentDownwardIntramanualCouplers=N
+
+[Coupler010]
+Name=I MANUAL SUB
+DefaultToEngaged=N
+UnisonOff=N
+DestinationManual=001
 DestinationKeyshift=-12
 CoupleToSubsequentUnisonIntermanualCouplers=N
 CoupleToSubsequentUpwardIntermanualCouplers=N
@@ -207,11 +219,12 @@ Stop007=016
 Stop008=017
 Stop009=018
 Stop010=019
-NumberOfCouplers=4
+NumberOfCouplers=5
 Coupler001=004
 Coupler002=005
 Coupler003=006
 Coupler004=007
+Coupler005=010
 NumberOfDivisionals=6
 Divisional001=007
 Divisional002=008
@@ -2179,7 +2192,7 @@ NumberOfRanks=1
 Rank001=025
 
 [Stop031]
-Name=Blower noise
+Name=EFEITO MOTOR
 DefaultToEngaged=Y
 GCState=-1
 FirstAccessiblePipeLogicalKeyNumber=1
@@ -3968,7 +3981,7 @@ ImageOff=OrganInstallationPackages\001161\CONSOLE\PistonOutSm.png
 Name=Home
 HasPedals=N
 NumberOfImages=0
-NumberOfGUIElements=19
+NumberOfGUIElements=30
 DispScreenSizeHoriz=1024
 DispScreenSizeVert=600
 DispDrawstopBackgroundImageNum=2
@@ -4179,6 +4192,122 @@ PositionX=530
 PositionY=360
 ImageOn=OrganInstallationPackages\001161\CONSOLE\StopDown-EchoTrompete8.png
 ImageOff=OrganInstallationPackages\001161\CONSOLE\StopUp-EchoTrompete8.png
+MouseRadius=0
+TextBreakWidth=0
+
+[Panel001Element020]
+Type=Label
+PositionX=616
+PositionY=335
+Image=OrganInstallationPackages\001161\HOME\tittlecouplers.png
+
+[Panel001Element021]
+Type=Coupler
+Manual=001
+Coupler=005
+PositionX=630
+PositionY=360
+ImageOn=OrganInstallationPackages\001161\CONSOLE\StopDown-ISub.png
+ImageOff=OrganInstallationPackages\001161\CONSOLE\StopUp-ISub.png
+TextRectLeft=60
+TextBreakWidth=0
+
+[Panel001Element022]
+Type=Coupler
+Manual=001
+Coupler=001
+PositionX=700
+PositionY=360
+ImageOn=OrganInstallationPackages\001161\CONSOLE\StopDown-ISuper.png
+ImageOff=OrganInstallationPackages\001161\CONSOLE\StopUp-ISuper.png
+TextRectLeft=60
+TextBreakWidth=0
+
+[Panel001Element023]
+Type=Coupler
+Manual=001
+Coupler=002
+PositionX=770
+PositionY=360
+ImageOn=OrganInstallationPackages\001161\CONSOLE\StopDown-I+II.png
+ImageOff=OrganInstallationPackages\001161\CONSOLE\StopUp-I+II.png
+MouseRadius=0
+TextBreakWidth=0
+
+[Panel001Element024]
+Type=Coupler
+Manual=001
+Coupler=003
+PositionX=840
+PositionY=360
+ImageOn=OrganInstallationPackages\001161\CONSOLE\StopDown-I+IISub.png
+ImageOff=OrganInstallationPackages\001161\CONSOLE\StopUp-I+IISub.png
+MouseRadius=0
+TextBreakWidth=0
+
+[Panel001Element025]
+Type=Coupler
+Manual=001
+Coupler=004
+PositionX=910
+PositionY=360
+ImageOn=OrganInstallationPackages\001161\CONSOLE\StopDown-I+IISuper.png
+ImageOff=OrganInstallationPackages\001161\CONSOLE\StopUp-I+IISuper.png
+MouseRadius=0
+TextBreakWidth=0
+
+[Panel001Element026]
+Type=Coupler
+Manual=002
+Coupler=002
+PositionX=630
+PositionY=470
+ImageOn=OrganInstallationPackages\001161\CONSOLE\StopDown-IISub.png
+ImageOff=OrganInstallationPackages\001161\CONSOLE\StopUp-IISub.png
+MouseRadius=0
+TextBreakWidth=0
+
+[Panel001Element027]
+Type=Coupler
+Manual=002
+Coupler=001
+PositionX=700
+PositionY=470
+ImageOn=OrganInstallationPackages\001161\CONSOLE\StopDown-ISuper.png
+ImageOff=OrganInstallationPackages\001161\CONSOLE\StopUp-ISuper.png
+MouseRadius=0
+TextBreakWidth=0
+
+[Panel001Element028]
+Type=Coupler
+Manual=000
+Coupler=001
+PositionX=770
+PositionY=470
+ImageOn=OrganInstallationPackages\001161\CONSOLE\StopDown-Ped+I.png
+ImageOff=OrganInstallationPackages\001161\CONSOLE\StopUp-Ped+I.png
+MouseRadius=0
+TextBreakWidth=0
+
+[Panel001Element029]
+Type=Coupler
+Manual=000
+Coupler=002
+PositionX=840
+PositionY=470
+ImageOn=OrganInstallationPackages\001161\CONSOLE\StopDown-Ped+ISuper.png
+ImageOff=OrganInstallationPackages\001161\CONSOLE\StopUp-Ped+ISuper.png
+MouseRadius=0
+TextBreakWidth=0
+
+[Panel001Element030]
+Type=Coupler
+Manual=000
+Coupler=003
+PositionX=910
+PositionY=470
+ImageOn=OrganInstallationPackages\001161\CONSOLE\StopDown-Ped+II.png
+ImageOff=OrganInstallationPackages\001161\CONSOLE\StopUp-Ped+II.png
 MouseRadius=0
 TextBreakWidth=0
 

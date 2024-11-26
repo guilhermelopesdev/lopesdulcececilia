@@ -1,0 +1,66 @@
+@echo off
+echo Deze batchfile hernoemt bestanden van de HW 2 benaming naar HW 1 benaming.
+echo Bijvoorbeeld: 36-C1 wordt dan 01-C1 etc.
+echo Gebruik [CTRL]-[C] om deze batchfile te stoppen.
+ren 036-C.wav 01-C1.wav
+ren 037-C#.wav 02-C#1.wav
+ren 038-D.wav 03-D1.wav
+ren 039-D#.wav 04-D#1.wav
+ren 040-E.wav 05-E1.wav
+ren 041-F.wav 06-F1.wav
+ren 042-F#.wav 07-F#1.wav
+ren 043-G.wav 08-G1.wav
+ren 044-G#.wav 09-G#1.wav
+ren 045-A.wav 10-A1.wav
+ren 046-A#.wav 11-A#1.wav
+ren 047-B.wav 12-B1.WAv
+ren 048-C.wav 13-C2.WAV
+ren 049-C#.wav 14-C#2.WAV
+ren 050-D.wav 15-D2.WAV
+ren 051-D#.wav 16-D#2.WAV
+ren 052-E.wav 17-E2.WAV
+ren 053-F.wav 18-F2.WAV
+ren 054-F#.wav 19-F#2.WAV
+ren 055-G.wav 20-G2.WAV
+ren 056-G#.wav 21-G#2.WAV
+ren 057-A.wav 22-A2.WAV
+ren 058-A#.wav 23-A#2.WAV
+ren 059-B.wav 24-B2.WAV
+ren 060-C.wav 25-C3.WAV
+ren 061-C#.wav 26-C#3.WAV
+ren 062-D.wav 27-D3.WAV
+ren 063-D#.wav 28-D#3.WAV
+ren 064-E.wav 29-E3.WAV
+ren 065-F.wav 30-F3.WAV
+ren 066-F#.wav 31-F#3.WAV
+ren 067-G.wav 32-G3.WAV
+ren 068-G#.wav 33-G#3.WAV
+ren 069-A.wav  34-A3.WAV
+ren 070-A#.wav 35-A#3.WAV
+ren 071-B.wav 36-B3.WAV
+ren 072-C.wav 37-C4.WAV
+ren 073-C#.wav 38-C#4.WAV
+ren 074-D.wav 39-D4.WAV
+ren 075-D#.wav 40-D#4.WAV
+ren 076-E.wav 41-E4.WAV
+ren 077-F.wav 42-F4.WAV
+ren 078-F#.wav 43-F#4.WAV
+ren 079-G.wav 44-G4.WAV
+ren 080-G#.wav 45-G#4.WAV
+ren 081-A.wav 46-A4.WAV
+ren 082-A#.wav 47-A#4.WAV
+ren 083-B.wav 48-B4.WAV
+ren 084-C.wav 49-C5.WAV
+ren 085-C#.wav 50-C#5.WAV
+ren 086-D.wav 51-D5.WAV
+ren 087-D#.wav 52-D#5.WAV
+ren 088-E.wav 53-E5.WAV
+ren 089-F.wav 54-F5.WAV
+ren 090-F#.wav 55-F#5.WAV
+ren 091-G.wav 56-G5.WAV
+ren 092-G#.wav 57-G#5.WAV
+ren 093-A.wav  58-A5.WAV
+ren 094-A#.wav 59-A#5.WAV
+ren 095-B.wav 60-B5.WAV
+ren 096-C.wav 61-C6.WAV
+

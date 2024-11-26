@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Hauptwerk FileFormat="InstallationPackage" FileFormatVersion="3.00">
+<ObjectList ObjectType="_General">
+	<_General>
+		<Sys_ObjectID>1</Sys_ObjectID>
+		<UniqueInstallationPackageID>001161</UniqueInstallationPackageID>
+		<Name>Grote kerk Wildervank</Name>
+		<ShortName>Wildervank</ShortName>
+		<PackageSupplierID>52</PackageSupplierID>
+		<SupplierName>Virtual-Organs.nl</SupplierName>
+		<PackageVersion>1.20</PackageVersion>
+		<PreviousMinInstalledPackageVersionRequiredWhenUpgradingToThisVersion/>
+	</_General>
+</ObjectList>
+<ObjectList ObjectType="CustomOrganRank">
+</ObjectList>
+<ObjectList ObjectType="CustomOrganTremulantWaveformSet">
+</ObjectList>
+</Hauptwerk>

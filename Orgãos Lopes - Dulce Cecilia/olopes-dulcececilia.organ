@@ -3997,6 +3997,7 @@ DispExtraDrawstopRowsAboveExtraButtonRows=N
 
 [Panel001Element001]
 Type=Label
+PositionX=0
 Image=OrganInstallationPackages\001161\HOME\superiorbar.png
 
 [Panel001Element002]

@@ -4,8 +4,8 @@ import subprocess
 import threading
 import platform
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QFontDatabase
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QPushButton, QSizePolicy
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QPushButton
 
 # Detecta se é macOS, Windows ou Linux
 is_mac = platform.system() == "Darwin"
@@ -82,7 +82,7 @@ def activate_window(window_name):
 
 # Função para capturar eventos MIDI
 def midi_listener(midi_port):
-    midi_in = rtmidi.MidiIn(rtapi=rtmidi.API_WINDOWS_MM)  # Defina o back-end no Windows
+    midi_in = rtmidi.MidiIn()  # Criação simples sem necessidade de definir backend
     midi_in.open_port(midi_port)
     while True:
         msg = midi_in.get_message()
@@ -123,7 +123,7 @@ class MidiWindowSelector(QWidget):
         midi_frame = QHBoxLayout()
         midi_label = QLabel("Selecione a Porta MIDI:")
         midi_frame.addWidget(midi_label)
-        midi_ports = rtmidi.MidiIn().get_ports()
+        midi_ports = rtmidi.MidiIn().get_ports()  # Corrigido para usar a função correta
         self.midi_port_var = QComboBox()
         self.midi_port_var.addItems([str(i) for i in range(len(midi_ports))])
         midi_frame.addWidget(self.midi_port_var)

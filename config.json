@@ -1,0 +1,15 @@
+{
+    "midi_in": "test",
+    "60": {
+        "title": "Janela Nota 60"
+    },
+    "61": {
+        "title": "Janela Nota 61"
+    },
+    "100": {
+        "title": "Spotify"
+    },
+    "110": {
+        "tittle": "Mail"
+    }
+}

@@ -4,13 +4,13 @@ import subprocess
 import threading
 import platform
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QPushButton
+from PyQt5.QtGui import QFont, QFontDatabase
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QPushButton, QSizePolicy
 
-# Detecta o sistema operacional (macOS, Linux ou Windows)
+# Detecta se é macOS, Windows ou Linux
 is_mac = platform.system() == "Darwin"
-is_linux = platform.system() == "Linux"
 is_windows = platform.system() == "Windows"
+is_linux = platform.system() == "Linux"
 
 # Função para listar janelas abertas
 def get_open_windows():
@@ -36,9 +36,13 @@ def get_open_windows():
         result = subprocess.getoutput('xdotool search --onlyvisible --name "" getwindowname %@')
         windows = result.split('\n')
     elif is_windows:
-        # pygetwindow para listar janelas no Windows
-        import pygetwindow as gw
-        windows = gw.getWindowsWithTitle('')
+        # Usar o PowerShell para listar janelas no Windows
+        script = '''
+        Add-Type -AssemblyName System.Windows.Forms
+        [System.Windows.Forms.Application]::OpenForms | ForEach-Object { $_.Text }
+        '''
+        result = subprocess.run(['powershell', '-Command', script], capture_output=True, text=True)
+        windows = result.stdout.strip().split('\r\n')
     else:
         windows = []
     return [win.strip() for win in windows if win.strip()]
@@ -67,18 +71,18 @@ def activate_window(window_name):
         if window_id:
             subprocess.call(['xdotool', 'windowactivate', window_id])
     elif is_windows:
-        # pygetwindow para ativar janelas no Windows
-        import pygetwindow as gw
-        windows = gw.getWindowsWithTitle(window_name)
-        if windows:
-            window = windows[0]  # Caso existam várias janelas com o mesmo nome
-            window.activate()
-            window.restore()  # Restaura a janela caso esteja minimizada
+        # Usar o PowerShell para ativar uma janela no Windows
+        script = f'''
+        Add-Type -AssemblyName System.Windows.Forms
+        $wshell = New-Object -ComObject wscript.shell
+        $wshell.AppActivate("{window_name}")
+        '''
+        subprocess.run(['powershell', '-Command', script])
     print(f"Ativando janela: {window_name}")
 
 # Função para capturar eventos MIDI
 def midi_listener(midi_port):
-    midi_in = rtmidi.MidiIn()
+    midi_in = rtmidi.MidiIn(rtapi=rtmidi.API_WINDOWS_MM)  # Defina o back-end no Windows
     midi_in.open_port(midi_port)
     while True:
         msg = midi_in.get_message()

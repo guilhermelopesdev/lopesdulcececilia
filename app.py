@@ -1,189 +1,114 @@
 import sys
-import rtmidi
-import subprocess
+import mido
 import threading
 import platform
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QPushButton
+import win32gui
+import pygetwindow as gw
+import json
+import os
 
-# Detecta se é macOS, Windows ou Linux
-is_mac = platform.system() == "Darwin"
+# Detecta o sistema operacional
 is_windows = platform.system() == "Windows"
-is_linux = platform.system() == "Linux"
 
-# Função para listar janelas abertas
+# Função para obter o diretório onde o script está localizado
+def get_script_directory():
+    return os.path.dirname(os.path.abspath(__file__))
+
+# Função para listar janelas abertas no Windows usando pywin32
 def get_open_windows():
-    if is_mac:
-        # AppleScript para listar janelas no macOS
-        script = '''
-        tell application "System Events"
-            set window_list to {}
-            set theProcesses to (every process whose visible is true)
-            repeat with proc in theProcesses
-                try
-                    set winNames to name of every window of proc
-                    set window_list to window_list & winNames
-                end try
-            end repeat
-        end tell
-        return window_list
-        '''
-        result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True)
-        windows = result.stdout.strip().split(', ')
-    elif is_linux:
-        # xdotool para listar janelas no Linux
-        result = subprocess.getoutput('xdotool search --onlyvisible --name "" getwindowname %@')
-        windows = result.split('\n')
-    elif is_windows:
-        # Usar o PowerShell para listar janelas no Windows
-        script = '''
-        Add-Type -AssemblyName System.Windows.Forms
-        [System.Windows.Forms.Application]::OpenForms | ForEach-Object { $_.Text }
-        '''
-        result = subprocess.run(['powershell', '-Command', script], capture_output=True, text=True)
-        windows = result.stdout.strip().split('\r\n')
-    else:
-        windows = []
-    return [win.strip() for win in windows if win.strip()]
+    def enum_windows_callback(hwnd, windows_list):
+        if win32gui.IsWindowVisible(hwnd):
+            window_title = win32gui.GetWindowText(hwnd)
+            if window_title:
+                windows_list.append(window_title)
 
-# Função para ativar uma janela pelo nome
+    windows = []
+    win32gui.EnumWindows(enum_windows_callback, windows)
+    return windows
+
+# Função para ativar uma janela no Windows
 def activate_window(window_name):
-    if is_mac:
-        # AppleScript para ativar janelas no macOS
-        script = f'''
-        tell application "System Events"
-            set theProcesses to (every process whose visible is true)
-            repeat with proc in theProcesses
-                try
-                    if (name of every window of proc) contains "{window_name}" then
-                        set frontmost of proc to true
-                        return
-                    end if
-                end try
-            end repeat
-        end tell
-        '''
-        subprocess.run(['osascript', '-e', script])
-    elif is_linux:
-        # xdotool para ativar janelas no Linux
-        window_id = subprocess.getoutput(f'xdotool search --name "{window_name}"')
-        if window_id:
-            subprocess.call(['xdotool', 'windowactivate', window_id])
-    elif is_windows:
-        # Usar o PowerShell para ativar uma janela no Windows
-        script = f'''
-        Add-Type -AssemblyName System.Windows.Forms
-        $wshell = New-Object -ComObject wscript.shell
-        $wshell.AppActivate("{window_name}")
-        '''
-        subprocess.run(['powershell', '-Command', script])
-    print(f"Ativando janela: {window_name}")
+    try:
+        # Encontre a janela com o nome especificado
+        windows = gw.getWindowsWithTitle(window_name)
+        if windows:
+            window = windows[0]
+            if window.isMinimized:
+                window.restore()  # Restaura se a janela estiver minimizada
+            window.activate()  # Coloca a janela no primeiro plano
+            print(f"Janela '{window_name}' ativada e restaurada.")
+    except Exception as e:
+        print(f"Erro ao ativar a janela: {e}")
 
 # Função para capturar eventos MIDI
-def midi_listener(midi_port):
-    midi_in = rtmidi.MidiIn()  # Criação simples sem necessidade de definir backend
-    midi_in.open_port(midi_port)
-    while True:
-        msg = midi_in.get_message()
-        if msg:
-            message, deltatime = msg
-            status, note, velocity = message
-            if status == 144 and velocity > 0:  # Note On message
-                window_name = midi_mappings.get(note)
-                if window_name:
-                    activate_window(window_name)
+def midi_listener(midi_port_name):
+    try:
+        midi_in = mido.open_input(midi_port_name)  # Usando open_input para abrir a porta MIDI
+        print(f"Conectado à porta MIDI {midi_port_name}")
+
+        while True:
+            for msg in midi_in.iter_pending():
+                if msg.type == 'note_on':  # Verifica se a mensagem MIDI é 'note_on'
+                    note = msg.note
+                    velocity = msg.velocity
+                    if velocity > 0:  # Verifica se a tecla foi pressionada
+                        print(f"Nota MIDI recebida: {note}")
+                        window_name = midi_mappings.get(note)
+                        if window_name:
+                            print(f"Ativando a janela: {window_name} para a nota {note}")
+                            activate_window(window_name)  # Ativa a janela mapeada para a nota MIDI
+    except Exception as e:
+        print(f"Erro ao escutar MIDI: {e}")
 
 # Função para iniciar a escuta MIDI em thread separada
 def start_midi_listener():
-    selected_port = midi_port_var.currentText()
-    if selected_port.isdigit():
-        threading.Thread(target=midi_listener, args=(int(selected_port),), daemon=True).start()
+    midi_port_name = "cantusmidi 0"  # Define a porta MIDI fixa com o número 0
+    print(f"Usando a porta MIDI fixa: {midi_port_name}")
+    try:
+        midi_ports = mido.get_input_names()
+        print(f"Portas MIDI disponíveis: {midi_ports}")
+        if midi_port_name in midi_ports:
+            threading.Thread(target=midi_listener, args=(midi_port_name,), daemon=True).start()
+        else:
+            print(f"Erro: Porta MIDI '{midi_port_name}' não encontrada.")
+    except Exception as e:
+        print(f"Erro ao iniciar thread de escuta MIDI: {e}")
 
-class MidiWindowSelector(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Cantus MIDI")
-        self.setGeometry(100, 100, 600, 500)  # Aumentando o tamanho da janela para acomodar os botões
+def list_and_refresh_windows():
+    print("Listando janelas disponíveis:")
+    windows = get_open_windows()
+    print("Janelas detectadas:")
+    for i, window in enumerate(windows):
+        print(f"{i+1}. {window}")
+    return windows
 
-        # Fonte medieval para o título
-        title_font = QFont("Times New Roman", 24, QFont.Bold)  # Fonte básica para simular medieval
-        title_font.setItalic(True)  # Pode usar itálico para dar um estilo diferente
+# Mapeamento de notas MIDI para janelas
+midi_mappings = {
+    1: 'Cantus MIDI',
+    2: 'AnyDesk',
+    3: 'GrandOrgue demo V1',
+    4: 'GrandOrgue v3.15.3-1 - GrandOrgue demo V1',
+    5: 'Configurações',
+    6: 'loopMIDI',
+    7: 'Microsoft Text Input Application',
+    8: 'Program Manager',
+    9: 'C:\\Windows\\py.exe',
+    10: 'app.py - C:\\Organ Files\\cantusmidi\\app.py (3.9.0)'
+}
 
-        # Layout principal
-        layout = QVBoxLayout()
+def main():
+    # Antes de iniciar a escuta MIDI, liste as janelas disponíveis
+    available_windows = list_and_refresh_windows()
+    
+    # Inicie a escuta MIDI imediatamente após a listagem das janelas
+    start_midi_listener()
 
-        # Título da janela com fonte medieval
-        title_label = QLabel("Cantus MIDI")
-        title_label.setFont(title_font)
-        title_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(title_label)
-
-        # Frame para seleção da porta MIDI
-        midi_frame = QHBoxLayout()
-        midi_label = QLabel("Selecione a Porta MIDI:")
-        midi_frame.addWidget(midi_label)
-        midi_ports = rtmidi.MidiIn().get_ports()  # Corrigido para usar a função correta
-        self.midi_port_var = QComboBox()
-        self.midi_port_var.addItems([str(i) for i in range(len(midi_ports))])
-        midi_frame.addWidget(self.midi_port_var)
-        start_button = QPushButton("Iniciar MIDI")
-        start_button.clicked.connect(start_midi_listener)
-        midi_frame.addWidget(start_button)
-        layout.addLayout(midi_frame)
-
-        # Frame para configuração dos botões (notas MIDI)
-        self.window_dropdowns = []
-        self.midi_buttons = []  # Lista para armazenar os botões MIDI
-
-        for i in range(10):
-            # Criar uma linha com o label e o dropdown para a janela associada à nota MIDI
-            frame = QHBoxLayout()
-            note_label = QLabel(f"Nota MIDI {i + 1}:")
-            frame.addWidget(note_label)
-            window_dropdown = QComboBox()
-            self.window_dropdowns.append(window_dropdown)
-            frame.addWidget(window_dropdown)
-
-            # Criar o botão para ativar a janela correspondente à nota MIDI
-            midi_button = QPushButton("Testar")
-            midi_button.setFixedSize(60, 30)  # Definir tamanho fixo para o botão
-            midi_button.clicked.connect(lambda _, note=i + 1: self.activate_midi_window(note))
-            self.midi_buttons.append(midi_button)
-
-            # Adicionando o botão na mesma linha
-            frame.addWidget(midi_button)
-            layout.addLayout(frame)
-
-        # Botão para atualizar lista de janelas
-        refresh_button = QPushButton("Atualizar Janelas")
-        refresh_button.clicked.connect(self.refresh_windows)  # Chamando o método da instância
-        layout.addWidget(refresh_button)
-
-        # Definir o layout da janela
-        self.setLayout(layout)
-        self.refresh_windows()  # Atualizar lista de janelas quando a janela for criada
-
-    # Função para atualizar a lista de janelas abertas
-    def refresh_windows(self):
-        windows = get_open_windows()
-        print("Janelas detectadas:", windows)  # Debug: verifique no console
-        for i in range(10):
-            # Certifique-se de usar a variável de instância da classe
-            self.window_dropdowns[i].clear()
-            self.window_dropdowns[i].addItems(windows)
-
-    # Função para ativar a janela associada à nota MIDI quando um botão for clicado
-    def activate_midi_window(self, note):
-        window_name = self.window_dropdowns[note - 1].currentText()
-        if window_name:
-            activate_window(window_name)
-
-# Função para mapear as notas MIDI para janelas
-midi_mappings = {}
+    # Manter o programa em execução
+    try:
+        while True:
+            pass
+    except KeyboardInterrupt:
+        print("\nPrograma encerrado.")
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MidiWindowSelector()
-    window.show()
-    sys.exit(app.exec())
+    main()

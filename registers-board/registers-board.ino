@@ -1,178 +1,126 @@
-//STABLE AND FINAL VERSION
-
 #include <Wire.h>
 
-const int numButtons = 20; // Total de 20 botões
-const int buttonPins[numButtons] = {22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 2, 3, 4, 5};
-const int numLeds = 20; // Total de 20 LEDs
-const int ledPins[numLeds] = {23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 6, 7, 8, 9};
-
+// Definição dos pinos e constantes
+const int numButtons = 34; // Total de botões
+const int buttonPins[numButtons] = {22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, A8, A10, A12, 2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 15, 16, 17, 18, 19};
+const int numLeds = 19; // Total de LEDs
+const int ledPins[numLeds] = {23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, A9, A11, A13};
 const int triggerPin = 14; // Porta que será acionada após receber a mensagem MIDI
 
+// Variáveis para debounce e estado
 int buttonState[numButtons] = {HIGH}; // Estado inicial HIGH (botões soltos)
 int lastButtonState[numButtons] = {HIGH}; // Estado inicial HIGH (botões soltos)
 unsigned long lastDebounceTime[numButtons] = {0};
-unsigned long debounceDelay = 50; // Tempo de debounce
+unsigned long debounceDelay = 50; // Tempo de debounce em milissegundos
 
+// Estados dos LEDs
 bool ledStates[numLeds] = {false}; // Estado atual dos LEDs
-
-bool midiReceived = false; // Flag para verificar se uma mensagem MIDI foi recebida
-bool note22Sent = false; // Flag para garantir que a nota 22 seja enviada apenas uma vez
 
 #define DEBUG false // Define se mensagens de depuração serão enviadas
 
 void setup() {
   Serial.begin(115200); // Inicia a comunicação serial na taxa de baud MIDI padrão
-  if (DEBUG) {
-    Serial.println("Inicializando...");
-  }
 
+  // Configura os pinos dos botões como entrada com pull-up interno
   for (int i = 0; i < numButtons; i++) {
-    pinMode(buttonPins[i], INPUT_PULLUP); // Configura os pinos dos botões como entrada com pull-up interno
-  }
-  for (int i = 0; i < numLeds; i++) {
-    pinMode(ledPins[i], OUTPUT); // Configura os pinos dos LEDs como saída
-    digitalWrite(ledPins[i], LOW); // Garante que todos os LEDs estão apagados inicialmente
+    pinMode(buttonPins[i], INPUT_PULLUP);
   }
 
-  pinMode(triggerPin, OUTPUT); // Configura a porta 14 como saída
-  digitalWrite(triggerPin, LOW); // Garante que a porta 14 está apagada inicialmente
-
-  // Adiciona um pequeno atraso para estabilizar o sistema
-  delay(1000);
-
-  // Verificação adicional para garantir que todos os LEDs estejam apagados
+  // Configura os pinos dos LEDs como saída e apaga-os
   for (int i = 0; i < numLeds; i++) {
+    pinMode(ledPins[i], OUTPUT);
     digitalWrite(ledPins[i], LOW);
-    ledStates[i] = false;
+    ledStates[i] = false; // Inicializa o estado dos LEDs como apagado
   }
 
-  // Aguarda a recepção de qualquer informação MIDI
-  waitForMidi();
+  // Configura a porta de trigger como saída e apaga-a
+  pinMode(triggerPin, OUTPUT);
+  digitalWrite(triggerPin, LOW);
+
+  if (DEBUG) Serial.println("Setup concluído.");
 }
 
 void loop() {
-  checkButtons();
-  readMidiMessages();
+  checkButtons();      // Verifica o estado dos botões
+  readMidiMessages();  // Lê e processa mensagens MIDI recebidas
 }
 
+// Função para verificar o estado dos botões com debounce
 void checkButtons() {
-  // Verifica o estado dos botões com debounce
   for (int i = 0; i < numButtons; i++) {
     int reading = digitalRead(buttonPins[i]);
 
+    // Se o estado mudou, registra o tempo da alteração
     if (reading != buttonState[i]) {
       lastDebounceTime[i] = millis();
     }
 
+    // Verifica se o tempo de debounce passou
     if ((millis() - lastDebounceTime[i]) > debounceDelay) {
+      // Se o estado mudou de fato
       if (reading != lastButtonState[i]) {
         lastButtonState[i] = reading;
 
-        if (lastButtonState[i] == LOW) {
-          // Botão foi pressionado
-          int note = i + 1; // Nota MIDI ajustada
-          sendNoteOn(note);
-          if (DEBUG) {
-            Serial.print("Botão pressionado: ");
-            Serial.print(i);
-            Serial.print(" Nota MIDI: ");
-            Serial.println(note);
-          }
-        } else {
-          // Botão foi solto
-          int note = i + 1; // Nota MIDI ajustada
-          sendNoteOff(note);
-          if (DEBUG) {
-            Serial.print("Botão solto: ");
-            Serial.print(i);
-            Serial.print(" Nota MIDI: ");
-            Serial.println(note);
-          }
+        int note = i + 1; // Nota MIDI ajustada (botão 0 -> nota 1)
+
+        if (lastButtonState[i] == LOW) { // Botão pressionado
+          sendNoteOn(note);  // Apenas envia a mensagem MIDI
+        } else { // Botão solto
+          sendNoteOff(note); // Envia mensagem Note Off
+        }
+
+        if (DEBUG) {
+          Serial.print("Botão "); Serial.print(i);
+          Serial.println((lastButtonState[i] == LOW) ? " pressionado." : " solto.");
         }
       }
     }
 
+    // Atualiza o estado atual do botão
     buttonState[i] = reading;
   }
 }
 
+// Função para enviar uma mensagem MIDI Note On
 void sendNoteOn(byte note) {
-  Serial.write(0x90); // Status byte for Note On, channel 1
+  Serial.write(0x90); // Status byte para Note On, canal 1
   Serial.write(note);
-  Serial.write(127); // Maximum velocity
+  Serial.write(127); // Velocidade máxima
 }
 
+// Função para enviar uma mensagem MIDI Note Off
 void sendNoteOff(byte note) {
-  Serial.write(0x80); // Status byte for Note Off, channel 1
+  Serial.write(0x80); // Status byte para Note Off, canal 1
   Serial.write(note);
-  Serial.write(0); // Velocity zero
+  Serial.write(0); // Velocidade zero
 }
 
+// Função para alternar o estado de um LED
+void toggleLed(int ledIndex, bool state) {
+  if (ledIndex >= 0 && ledIndex < numLeds) {
+    digitalWrite(ledPins[ledIndex], state ? HIGH : LOW);
+    ledStates[ledIndex] = state; // Atualiza o estado do LED
+  }
+}
+
+// Função para ler mensagens MIDI recebidas
 void readMidiMessages() {
-  // Lê mensagens MIDI recebidas e as armazena no buffer
   while (Serial.available() >= 3) {
     byte command = Serial.read();
     byte note = Serial.read();
     byte velocity = Serial.read();
-    if ((command & 0xF0) == 0x90 && velocity > 0) { // Note On
-      handleNoteOn(note, velocity);
-    } else if ((command & 0xF0) == 0x80 || ((command & 0xF0) == 0x90 && velocity == 0)) { // Note Off
-      handleNoteOff(note);
+
+    // Processar a mensagem MIDI recebida
+    if (command == 0x90 && velocity > 0) { // Note On
+      toggleLed(note - 1, true); // Acende o LED correspondente
+    } else if (command == 0x80 || (command == 0x90 && velocity == 0)) { // Note Off
+      toggleLed(note - 1, false); // Apaga o LED correspondente
     }
-  }
-}
 
-void handleNoteOn(byte note, byte velocity) {
-  if (note >= 1 && note <= 20) {
-    int ledIndex = note - 1; // Ajusta o índice do LED de acordo com a nota MIDI
-    if (ledIndex < numLeds) {
-      ledStates[ledIndex] = true; // Liga o LED
-      digitalWrite(ledPins[ledIndex], HIGH); // Liga o LED
-      if (DEBUG) {
-        Serial.print("LED ");
-        Serial.print(ledIndex + 1);
-        Serial.println(" ligado.");
-      }
-    }
-  }
-}
-
-void handleNoteOff(byte note) {
-  if (note >= 1 && note <= 20) {
-    int ledIndex = note - 1; // Ajusta o índice do LED de acordo com a nota MIDI
-    if (ledIndex < numLeds) {
-      ledStates[ledIndex] = false; // Desliga o LED
-      digitalWrite(ledPins[ledIndex], LOW); // Desliga o LED
-      if (DEBUG) {
-        Serial.print("LED ");
-        Serial.print(ledIndex + 1);
-        Serial.println(" desligado.");
-      }
-    }
-  }
-}
-
-void waitForMidi() {
-  while (!midiReceived) {
-    if (Serial.available() > 0) {
-      midiReceived = true; // Mensagem MIDI recebida
-
-      // Envia a nota 22 apenas uma vez
-      if (!note22Sent) {
-        sendNoteOn(22); // Envia a nota 22
-        delay(100); // Breve atraso para simular o pressionamento do botão
-        sendNoteOff(22); // Envia o comando Note Off para a nota 22
-        note22Sent = true; // Marca como enviada
-        if (DEBUG) {
-          Serial.println("Nota MIDI 22 enviada.");
-        }
-      }
-
-      digitalWrite(triggerPin, HIGH); // Liga a porta 14
-      if (DEBUG) {
-        Serial.println("Mensagem MIDI recebida, prosseguindo para o loop.");
-      }
+    if (DEBUG) {
+      Serial.print("MIDI Command: 0x"); Serial.print(command, HEX);
+      Serial.print(" Note: "); Serial.print(note);
+      Serial.print(" Velocity: "); Serial.println(velocity);
     }
   }
 }
